@@ -5,27 +5,10 @@ from webdriver_manager.chrome import ChromeDriverManager
 import pandas as pd
 
 
-def scrape_all():
+def scrape():
     executable_path = {'executable_path': ChromeDriverManager().install()}
-    browser = Browser('chrome', **executable_path, headless=True)
+    browser=  Browser('chrome', **executable_path, headless=True)
 
-    news_title, news_p = mars_articles(browser)
-    img_urls_titles = hemispheres_mars(browser)
-
-    data = {
-        'news_title' : news_title,
-        'news_paragraph' : news_p,
-        'featured_image' : mars_images(browser),
-        'table' : tables_mars(),
-        'hemispheres' : img_urls_titles
-    }
-    browser.quit()
-    return data
-
-
-def mars_articles():
-    executable_path = {'executable_path': ChromeDriverManager().install()}
-    browser= Browser('chrome', **executable_path, headless=False)
     url = 'https://redplanetscience.com/'
     browser.visit(url)
     time.sleep(1)
@@ -40,16 +23,7 @@ def mars_articles():
     news_p = soup.find_all('div', class_= 'article_teaser_body')
     for paragraph in news_p:
         news_p = paragraph.text
-    
-    browser.quit()
-    
-    return news_title, news_p
-    
-    
 
-def mars_images():
-    executable_path = {'executable_path': ChromeDriverManager().install()}
-    browser= Browser('chrome', **executable_path, headless=False)
     url = 'https://spaceimages-mars.com/'
     browser.visit(url)
     time.sleep(1)
@@ -59,18 +33,13 @@ def mars_images():
     images = images_soup.find_all('img', class_='headerimage fade-in')
     for img in images:
         if img.has_attr('src'):
-            print(img['src'])
+            
             image=img['src']
 
     featured_image_url =  f'https://spaceimages-mars.com/{image}'
     
 
-    browser.quit ()
-    return featured_image_url
 
-def hemispheres_mars():
-    executable_path = {'executable_path': ChromeDriverManager().install()}
-    browser= Browser('chrome', **executable_path, headless=False)
     url = 'https://marshemispheres.com/'
     browser.visit(url)
     time.sleep(1)
@@ -100,8 +69,6 @@ def hemispheres_mars():
    
 
 
-    executable_path = {'executable_path': ChromeDriverManager().install()}
-    browser= Browser('chrome', **executable_path, headless=False)
     browser.visit(cerberus_html)
     html = browser.html
     cerberus_soup = bs(html, "html.parser")
@@ -114,8 +81,6 @@ def hemispheres_mars():
     cerberus_image_url =url + cerb
    
 
-    executable_path = {'executable_path': ChromeDriverManager().install()}
-    browser= Browser('chrome', **executable_path, headless=False)
     browser.visit(schiap_html)
     html = browser.html
     schiap_soup = bs(html, "html.parser")
@@ -128,8 +93,6 @@ def hemispheres_mars():
     schiap_image_url =url + schi
   
 
-    executable_path = {'executable_path': ChromeDriverManager().install()}
-    browser= Browser('chrome', **executable_path, headless=False)
     browser.visit(syrtis_html)
     html = browser.html
     syrtis_soup = bs(html, "html.parser")
@@ -142,8 +105,6 @@ def hemispheres_mars():
     syrtis_image_url =url + syrt
   
 
-    executable_path = {'executable_path': ChromeDriverManager().install()}
-    browser= Browser('chrome', **executable_path, headless=False)
     browser.visit(valles_html)
     html = browser.html
     valles_soup = bs(html, "html.parser")
@@ -164,10 +125,6 @@ def hemispheres_mars():
     ]
     
 
-    browser.quit()
-    return hemisphere_image_urls
-
-def tables_mars():
     url_mars = 'https://galaxyfacts-mars.com/'
     tables = pd.read_html(url_mars)
 
@@ -184,6 +141,17 @@ def tables_mars():
 
     html_table = df.to_html()
     html_table.replace('\n', '')
-    print(html_table)
+  
 
 
+    mars_data = {
+        "news_title": news_title,
+        "news_p": news_p,
+        "featured_image_url": featured_image_url,
+        "mars_table": html_table    ,
+        "hemisphere_image_urls": hemisphere_image_urls
+    }
+
+    browser.quit()
+
+    return mars_data
