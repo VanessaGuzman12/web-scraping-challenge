@@ -1,8 +1,9 @@
 from splinter import Browser
-from bs4 import BeautifulSoup as bs
+from bs4 import BeautifulSoup as soup
 import time
 from webdriver_manager.chrome import ChromeDriverManager
 import pandas as pd
+import pymongo
 
 
 def scrape():
@@ -14,21 +15,18 @@ def scrape():
     time.sleep(1)
 
     html = browser.html
-    soup = bs(html, "html.parser")
+    news_soup = soup(html, "html.parser")
 
-    news_title = soup.find_all('div', class_="content_title")
-    for title in news_title:
-        news_title= title.text
+    news_title = news_soup.find('div', class_="content_title").text
 
-    news_p = soup.find_all('div', class_= 'article_teaser_body')
-    for paragraph in news_p:
-        news_p = paragraph.text
+    news_p = news_soup.find('div', class_= 'article_teaser_body').text
+    
 
     url = 'https://spaceimages-mars.com/'
     browser.visit(url)
     time.sleep(1)
     html = browser.html
-    images_soup = bs(html, "html.parser")
+    images_soup = soup(html, "html.parser")
 
     images = images_soup.find_all('img', class_='headerimage fade-in')
     for img in images:
@@ -45,7 +43,7 @@ def scrape():
     time.sleep(1)
 
     html = browser.html
-    hemisphere_soup = bs(html, "html.parser")
+    hemisphere_soup = soup(html, "html.parser")
 
     hemis_html = hemisphere_soup.find_all('a',class_="itemLink product-item")
 
@@ -71,7 +69,7 @@ def scrape():
 
     browser.visit(cerberus_html)
     html = browser.html
-    cerberus_soup = bs(html, "html.parser")
+    cerberus_soup = soup(html, "html.parser")
 
     cerberus_img = cerberus_soup.find_all('img', class_='wide-image')
     for img in cerberus_img:
@@ -83,7 +81,7 @@ def scrape():
 
     browser.visit(schiap_html)
     html = browser.html
-    schiap_soup = bs(html, "html.parser")
+    schiap_soup = soup(html, "html.parser")
 
     schiap_img = schiap_soup.find_all('img', class_='wide-image')
     for img in schiap_img:
@@ -95,7 +93,7 @@ def scrape():
 
     browser.visit(syrtis_html)
     html = browser.html
-    syrtis_soup = bs(html, "html.parser")
+    syrtis_soup = soup(html, "html.parser")
 
     syrtis_img = syrtis_soup.find_all('img', class_='wide-image')
     for img in syrtis_img:
@@ -107,7 +105,7 @@ def scrape():
 
     browser.visit(valles_html)
     html = browser.html
-    valles_soup = bs(html, "html.parser")
+    valles_soup = soup(html, "html.parser")
 
     valles_img = valles_soup.find_all('img', class_='wide-image')
     for img in valles_img:
@@ -126,21 +124,13 @@ def scrape():
     
 
     url_mars = 'https://galaxyfacts-mars.com/'
-    tables = pd.read_html(url_mars)
+    tables = pd.read_html(url_mars)[0]
 
-    comparison_df = tables[0]
-    comparison_df = comparison_df.drop([0], axis = 0)
+    tables.columns=['Description', 'Mars', 'Earth']
+    tables.set_index('Description', inplace=True)
 
-    cols = list(comparison_df.columns)
-    cols[0] = "Mars - Earth Comparison"
-    cols[1] = "Mars"
-    cols[2]= "Earth"
-    comparison_df.columns = cols
-
-    df = comparison_df.reset_index(drop=True)
-
-    html_table = df.to_html()
-    html_table.replace('\n', '')
+    html_table = tables.to_html()
+    
   
 
 
@@ -155,3 +145,5 @@ def scrape():
     browser.quit()
 
     return mars_data
+
+#print(scrape())
